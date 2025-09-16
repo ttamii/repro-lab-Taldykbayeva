@@ -1,0 +1,18 @@
+{
+  "params": {
+    "seed": 173,
+    "lr": 0.0015,
+    "epochs": 5
+  },
+  "versions": {
+    "torch": "2.8.0+cpu",
+    "numpy": "2.3.3"
+  },
+  "results": {
+    "final_loss": 0.5922215580940247
+  },
+  "artifacts": {
+    "model_sha256": "e666b473915300c3a69ade373e7b9bc726ab7b7899447edcaa71151adb081461"
+  },
+  "git_commit": "958a0f5800e2d600b4d36a428cdd393c9b1487d7"
+}
