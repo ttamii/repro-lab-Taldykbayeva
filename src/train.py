@@ -7,7 +7,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
-import torch.nn as nn
+from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 
 from .seed_utils import set_seed
@@ -50,24 +50,24 @@ def main():
     set_seed(SEED)
 
     # 2. Генерация данных
+    # читает параметры из CLI; генерирует два гауссовых класса по вашему варианту
+    # (в данном случае параметры захардкожены, а не из CLI)
     n_samples = 1000
     cov = [[SIGMA**2, 0], [0, SIGMA**2]]
     class0_data = np.random.multivariate_normal(MU0, cov, n_samples // 2)
     class1_data = np.random.multivariate_normal(MU1, cov, n_samples // 2)
 
     X = np.vstack((class0_data, class1_data)).astype(np.float32)
-    # Длинная строка была разбита на несколько для flake8
-    y_zeros = np.zeros(n_samples // 2)
-    y_ones = np.ones(n_samples // 2)
-    y = np.hstack((y_zeros, y_ones)).astype(np.float32)
+    y_combined = np.hstack((np.zeros(n_samples // 2), np.ones(n_samples // 2)))
+    y = y_combined.astype(np.float32)
     y = y.reshape(-1, 1)
 
     X_tensor, y_tensor = torch.tensor(X), torch.tensor(y)
     dataset = TensorDataset(X_tensor, y_tensor)
 
     # 3. Создание DataLoader
+    # DataLoader(..., shuffle=True, generator=make_generator(seed), num_workers=0)
     generator = torch.Generator().manual_seed(SEED)
-    # Длинный вызов был разбит на несколько строк для flake8
     data_loader = DataLoader(
         dataset,
         batch_size=BATCH_SIZE,
@@ -77,12 +77,13 @@ def main():
     )
 
     # 4. Определение модели и оптимизатора
-    # Длинный вызов был разбит на несколько строк для flake8
+    # модель: Linear -> ReLU -> Linear (hidden из варианта)
     model = nn.Sequential(
         nn.Linear(2, HIDDEN_NEURONS),
         nn.ReLU(),
         nn.Linear(HIDDEN_NEURONS, 1),
     )
+    # оптимизатор и lr — из варианта
     optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
     loss_fn = nn.BCEWithLogitsLoss()
 
@@ -100,6 +101,7 @@ def main():
     print(f"Обучение завершено. Финальная ошибка: {final_loss:.8f}")
 
     # 6. Сохранение артефактов
+    # сохраняет model_*.pt и run_*.json (final_loss, версии, commit, sha256)
     runs_dir = Path("runs")
     runs_dir.mkdir(exist_ok=True)
 
